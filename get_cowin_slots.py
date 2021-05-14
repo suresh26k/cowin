@@ -23,7 +23,9 @@ COWIN_API = "cdn-api.co-vin.in"
 COWIN_API_SUFFIX = "/api/v2/appointment/sessions/public/calendarByDistrict?district_id=513&date="
 
 # Date to query
+TODAY = datetime.date.today().strftime("%d-%m-%Y")
 TOMORROW = (datetime.date.today() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+query_date = TODAY
 
 
 # In[3]:
@@ -34,7 +36,7 @@ TOMORROW = (datetime.date.today() + datetime.timedelta(days=1)).strftime("%d-%m-
 conn = http.client.HTTPSConnection(COWIN_API)
 payload = ''
 headers = {}
-conn.request("GET", COWIN_API_SUFFIX+TOMORROW, payload, headers)
+conn.request("GET", COWIN_API_SUFFIX+query_date, payload, headers)
 res = conn.getresponse()
 data = res.read().decode("utf-8")
 
@@ -67,13 +69,13 @@ all_vaccine_centers_df = pd.DataFrame(
 
 
 # SPLITS SESSION
-vaccine_sessions_df = pd.concat([all_vaccine_centers_df.drop('sessions', axis=1), all_vaccine_centers_df['sessions'].apply(pd.Series)[0].apply(pd.Series)], axis=1)
+vaccine_centers_df = pd.concat([all_vaccine_centers_df.drop('sessions', axis=1), all_vaccine_centers_df['sessions'].apply(pd.Series)[0].apply(pd.Series)], axis=1)
 
 
 # In[7]:
 
 
-vaccine_sessions_df
+vaccine_centers_df
 
 
 # In[8]:
@@ -86,15 +88,15 @@ vaccine_sessions_df
 # In[9]:
 
 
-vaccine_sessions_df
+vaccine_centers_df
 
 
-# In[35]:
+# In[10]:
 
 
 # Removing unavailable centers
-available_centers_df = vaccine_sessions_df[
-    vaccine_sessions_df.available_capacity != 0
+available_centers_df = vaccine_centers_df[
+    vaccine_centers_df.available_capacity != 0
 ].drop(
     columns=[
         'session_id', 
@@ -103,7 +105,7 @@ available_centers_df = vaccine_sessions_df[
 )
 
 
-# In[36]:
+# In[11]:
 
 
 # Available centers for 18 plus
@@ -113,7 +115,7 @@ available_centers_18_df = available_centers_df[
 available_centers_18_df
 
 
-# In[37]:
+# In[12]:
 
 
 # Available centers for 45 plus
